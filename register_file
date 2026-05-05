@@ -1,0 +1,32 @@
+// register_file.v 8 x 16-bit Register File
+// Zeyad Nehal
+module register_file (
+    input        clk,
+    input        rst,
+    input        reg_write,
+    input  [2:0] read_reg1,
+    input  [2:0] read_reg2,
+    input  [2:0] write_reg,
+    input  [15:0] write_data,
+    output [15:0] read_data1,
+    output [15:0] read_data2
+);
+    reg [15:0] registers [0:7]; // 8 registers, each 16 bits
+    integer i;
+
+    // Read (combinational)
+    assign read_data1 = registers[read_reg1];
+    assign read_data2 = registers[read_reg2];
+
+    // Write (synchronous) + Reset
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            for (i = 0; i < 8; i = i + 1)
+                registers[i] <= 16'd0;
+        end else if (reg_write && write_reg != 3'd0) begin
+            // R0 is hardwired to 0 (cannot be written)
+            registers[write_reg] <= write_data;
+        end
+    end
+
+endmodule
