@@ -1,0 +1,32 @@
+// alu.v  16-bit ALU for RISC Processor
+// Zeyad Nehal
+module alu (
+    input  [15:0] A,
+    input  [15:0] B,
+    input  [3:0]  alu_op,
+    output reg [15:0] result,
+    output zero
+);
+    // ALU Operation Codes
+    // 0000 = ADD, 0001 = SUB, 0010 = AND, 0011 = OR
+    // 0100 = XOR, 0101 = NOT A, 0110 = SHL, 0111 = SHR
+    // 1000 = SLT (set less than)
+
+    always @(*) begin
+        case (alu_op)
+            4'b0000: result = A + B;           // ADD
+            4'b0001: result = A - B;           // SUB
+            4'b0010: result = A & B;           // AND
+            4'b0011: result = A | B;           // OR
+            4'b0100: result = A ^ B;           // XOR
+            4'b0101: result = ~A;              // NOT
+            4'b0110: result = A << 1;          // SHL
+            4'b0111: result = A >> 1;          // SHR
+            4'b1000: result = (A < B) ? 16'd1 : 16'd0; // SLT
+            default: result = 16'd0;
+        endcase
+    end
+
+    assign zero = (result == 16'd0);
+
+endmodule
