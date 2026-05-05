@@ -1,0 +1,59 @@
+// tb_risc_processor.v  TESTBENCH
+// Zeyad Nehal
+// ***ADD THIS FILE ONLY TO SIMULATION SOURCES REST ALL WILL BE IN DESIGN SOURCES***
+// Add this file ONLY to Simulation Sources
+
+`timescale 1ns / 1ps
+
+module tb_risc_processor;
+
+    reg clk;
+    reg rst;
+
+    // Instantiate the processor
+    risc_processor_top uut (
+        .clk (clk),
+        .rst (rst)
+    );
+
+    // Clock: 10ns period (100 MHz)
+    initial clk = 0;
+    always #5 clk = ~clk;
+
+    // Stimulus
+    initial begin
+        $display("=== 16-bit RISC Processor Simulation Start ===");
+
+        // Assert reset
+        rst = 1;
+        #20;
+        rst = 0;
+        $display("Reset released at t=%0t", $time);
+
+        // Run for 200 clock cycles
+        #1000;
+
+        $display("=== Simulation Complete ===");
+        $finish;
+    end
+
+    // Monitor key signals every clock
+    initial begin
+        $monitor("Time=%0t | PC=%0d | INSTR=%b | R1=%0d | R2=%0d | R3=%0d | R4=%0d",
+            $time,
+            uut.pc_out,
+            uut.instruction,
+            uut.RF.registers[1],
+            uut.RF.registers[2],
+            uut.RF.registers[3],
+            uut.RF.registers[4]
+        );
+    end
+
+    // Dump waveforms
+    initial begin
+        $dumpfile("risc_processor.vcd");
+        $dumpvars(0, tb_risc_processor);
+    end
+
+endmodule
