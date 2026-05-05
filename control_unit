@@ -1,0 +1,56 @@
+// control_unit.v  Instruction Decoder / Control Unit
+// Zeyad Nehal
+// Instruction Format:
+//   R-Type: [15:12]=opcode [11:9]=rd [8:6]=rs1 [5:3]=rs2 [2:0]=unused
+//   I-Type: [15:12]=opcode [11:9]=rd [8:6]=rs1 [5:0]=imm6
+//   B-Type: [15:12]=opcode [11:9]=rs1 [8:6]=rs2 [5:0]=offset
+//   J-Type: [15:12]=opcode [11:0]=jump_addr
+//
+// Opcodes:
+//   0000 = ADD (R), 0001 = SUB (R), 0010 = AND (R), 0011 = OR (R)
+//   0100 = XOR (R), 0101 = NOT (R), 0110 = SHL (R), 0111 = SHR (R)
+//   1000 = ADDI (I), 1001 = LW (I), 1010 = SW (I)
+//   1011 = BEQ (B), 1100 = BNE (B)
+//   1101 = JMP (J)
+//   1110 = SLT (R)
+
+module control_unit (
+    input  [3:0] opcode,
+    output reg       reg_write,
+    output reg       alu_src,      // 0=reg, 1=imm
+    output reg       mem_read,
+    output reg       mem_write,
+    output reg       mem_to_reg,   // 0=alu, 1=mem
+    output reg       branch,
+    output reg       branch_ne,
+    output reg       jump,
+    output reg [3:0] alu_op
+);
+    always @(*) begin
+        // Defaults
+        reg_write  = 0; alu_src   = 0;
+        mem_read   = 0; mem_write = 0;
+        mem_to_reg = 0; branch    = 0;
+        branch_ne  = 0; jump      = 0;
+        alu_op     = 4'b0000;
+
+        case (opcode)
+            4'b0000: begin reg_write=1; alu_op=4'b0000; end // ADD
+            4'b0001: begin reg_write=1; alu_op=4'b0001; end // SUB
+            4'b0010: begin reg_write=1; alu_op=4'b0010; end // AND
+            4'b0011: begin reg_write=1; alu_op=4'b0011; end // OR
+            4'b0100: begin reg_write=1; alu_op=4'b0100; end // XOR
+            4'b0101: begin reg_write=1; alu_op=4'b0101; end // NOT
+            4'b0110: begin reg_write=1; alu_op=4'b0110; end // SHL
+            4'b0111: begin reg_write=1; alu_op=4'b0111; end // SHR
+            4'b1000: begin reg_write=1; alu_src=1; alu_op=4'b0000; end // ADDI
+            4'b1001: begin reg_write=1; alu_src=1; mem_read=1; mem_to_reg=1; alu_op=4'b0000; end // LW
+            4'b1010: begin alu_src=1; mem_write=1; alu_op=4'b0000; end // SW
+            4'b1011: begin branch=1; alu_op=4'b0001; end   // BEQ
+            4'b1100: begin branch_ne=1; alu_op=4'b0001; end // BNE
+            4'b1101: begin jump=1; end                       // JMP
+            4'b1110: begin reg_write=1; alu_op=4'b1000; end // SLT
+            default: begin end
+        endcase
+    end
+endmodule
